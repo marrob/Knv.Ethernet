@@ -12,9 +12,13 @@ namespace Knv.Eth
     {
         string LOG_ROOT_DIR = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
+        /*
         string SRC_MAC_ADDR = "0040F49CA5E4";        //PC
         string DEST_MAC_ADDR = "8823FE0278B4";      //DUT
+        */
 
+        string SRC_MAC_ADDR = "00802F36770E";        //PC - ECUTS2
+        string DEST_MAC_ADDR = "8823FE0278B4";      //DUT
 
         [Test]
         public void EthPacketTester_Test()
