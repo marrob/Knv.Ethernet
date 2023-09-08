@@ -4,6 +4,7 @@ namespace Knv.Eth
     using Knv.Ethernet;
     using NUnit.Framework;
     using System;
+    using System.Diagnostics;
     using System.Reflection;
 
     [TestFixture]
@@ -24,10 +25,26 @@ namespace Knv.Eth
         {
             using (var ept = new EthPacketTester(SRC_MAC_ADDR))
             {
-                var data = ept.Test(DEST_MAC_ADDR, new byte[] { 0x55, 0x55, 0x55, 0x55 });
+        
 
                 ept.OpenLogByNpp(ept.LogSave(LOG_ROOT_DIR, MethodBase.GetCurrentMethod().Name));
             }
+        }
+
+
+        [Test]
+        public void EthernetTester()
+        {
+            var startInfo = new ProcessStartInfo();
+            startInfo.FileName = $@"{TestContext.CurrentContext.TestDirectory}\Knv.Ethernet.exe";
+            startInfo.Arguments = "00E04C3DA62F 8823FE0278B4 \"D:\\Log\" 1694170903";
+
+            using (Process exeProcess = Process.Start(startInfo))
+            {
+                exeProcess.WaitForExit();
+            }
+
+
         }
 
     }

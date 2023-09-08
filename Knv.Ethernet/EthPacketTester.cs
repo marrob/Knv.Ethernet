@@ -8,7 +8,6 @@ namespace Knv.Ethernet
     using System.Net.NetworkInformation;
     using System.Reflection;
 
-
     public class EthPacketTester : Log, IDisposable
     {
         const int MacAddrLen = 6;
@@ -16,25 +15,19 @@ namespace Knv.Ethernet
         static readonly byte[] EthPacketType = new byte[] { 0x08, 0x06 };
 
         ILiveDevice _device = null;
-        bool _simulation = false;
         bool _disposed = false;
         string _srcMacAddr = string.Empty;
 
+
+      
         /// <summary>
         /// 
         /// </summary>
         /// <param name="srcMacAddr">eg:0040F49CA5E4</param>
         /// <param name="simulation"></param>
-        public EthPacketTester(string srcMacAddr, bool simulation = false)
+        public EthPacketTester(string srcMacAddr)
         {
-            _simulation = simulation;
             _srcMacAddr = srcMacAddr;
-
-            if (_simulation)
-            {
-                LogWriteLine($"Start, Source MAC:{srcMacAddr}, Version: {Version()}, SharpPcap: {Pcap.SharpPcapVersion}, Simulation is ENABLED!");
-                return;
-            }
             //MAC alapján megszerzem az NIC eszközt
             var devices = CaptureDeviceList.Instance;
 
@@ -60,30 +53,7 @@ namespace Knv.Ethernet
             _device.Open();
             LogWriteLine($"Start, Source MAC:{srcMacAddr}, Version: {Version()}, SharpPcap: {Pcap.SharpPcapVersion}");
         }
-
-
-
-        public byte[] Test(string destMacAddr, byte[] reqData, int timeoutMs = 3000)
-        {
-            LogWriteLine($"*** Src:{_srcMacAddr} Dest:{destMacAddr}, Data:{string.Join(" ", reqData.Select(x => x.ToString("X2")))} ***");
-            for (int repeat = 0; repeat < 3; repeat++)
-            {
-                var respData = SendReceive(destMacAddr, reqData);
-                if (respData.Length >= reqData.Length)
-                {
-                    var result = new byte[reqData.Length];
-                    Array.Copy(respData, result, result.Length);
-                    return result;
-                }
-                LogWriteLine($"Request Repeat {repeat}/{2}");
-            }
-
-            return new byte[reqData.Length];
-
-        }
-
-
-        byte[] SendReceive(string destMacAddr, byte[] reqData, int timeoutMs = 3000)
+        public byte[] SendReceive(string destMacAddr, byte[] reqData, int timeoutMs = 3000)
         {
 
             var destMac = PhysicalAddress.Parse(destMacAddr).GetAddressBytes();

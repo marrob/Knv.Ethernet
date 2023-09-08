@@ -2686,7 +2686,7 @@ tsDefaultColor:
 						<value>false</value>
 					</MakeStepNamesUnique>
 					<SaveOnClose classname='Num'>
-						<value>2</value>
+						<value>1</value>
 					</SaveOnClose>
 					<PromptForOverwrite classname='Num'>
 						<value>2</value>
