@@ -1,7 +1,6 @@
 ﻿
 namespace Knv.Eth
 {
-
     using NUnit.Framework;
     using SharpPcap;
     using System;

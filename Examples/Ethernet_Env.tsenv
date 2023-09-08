@@ -1,0 +1,4 @@
+[TestStandPaths]
+CommonAppData = "Environment\\CommonAppData"
+LocalAppData = "Environment\\LocalAppData"
+Public = "Environment\\TestStandPublic"

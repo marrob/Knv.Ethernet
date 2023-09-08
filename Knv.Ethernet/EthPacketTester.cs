@@ -37,13 +37,25 @@ namespace Knv.Ethernet
             }
             //MAC alapján megszerzem az NIC eszközt
             var devices = CaptureDeviceList.Instance;
-            _device = devices.First(n =>
+
+            try
             {
-                if (n.MacAddress != null)
-                    return n.MacAddress.Equals(PhysicalAddress.Parse(srcMacAddr));
-                else
-                    return false;
-            });
+                _device = devices.First(n =>
+                {
+                    if (n.MacAddress != null)
+                        return n.MacAddress.Equals(PhysicalAddress.Parse(srcMacAddr));
+                    else
+                        return false;
+                });
+            }
+            catch (Exception ex)
+            {
+                var msg = $"Error: Your PC does not contain Network Interface (NIC) with {srcMacAddr} MAC adderess. Please check it.\r\n";
+                msg += $"Source MAC: {srcMacAddr}, Version: {Version()}, SharpPcap: {Pcap.SharpPcapVersion}\r\n";
+                msg += ex.Message;
+                LogWriteLine(msg);
+                throw new Exception(msg);
+            }
 
             _device.Open();
             LogWriteLine($"Start, Source MAC:{srcMacAddr}, Version: {Version()}, SharpPcap: {Pcap.SharpPcapVersion}");

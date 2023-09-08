@@ -4,7 +4,6 @@ namespace Knv.Eth
     using Knv.Ethernet;
     using NUnit.Framework;
     using System;
-    using System.Linq;
     using System.Reflection;
 
     [TestFixture]
