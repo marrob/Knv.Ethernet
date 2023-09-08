@@ -1,5 +1,5 @@
 ﻿
-namespace Knv.Eth
+namespace Knv.Eth.UnitTest
 {
     using Knv.Ethernet;
     using NUnit.Framework;
@@ -8,7 +8,7 @@ namespace Knv.Eth
     using System.Reflection;
 
     [TestFixture]
-    internal class EthPacketTester_UnitTest
+    internal class Ethernet_UnitTest
     {
         string LOG_ROOT_DIR = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
@@ -23,7 +23,7 @@ namespace Knv.Eth
         [Test]
         public void EthPacketTester_Test()
         {
-            using (var ept = new EthPacketTester(SRC_MAC_ADDR))
+            using (var ept = new EthernetPacketTool(SRC_MAC_ADDR))
             {
         
 

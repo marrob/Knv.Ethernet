@@ -8,7 +8,7 @@ namespace Knv.Ethernet
     using System.Net.NetworkInformation;
     using System.Reflection;
 
-    public class EthPacketTester : Log, IDisposable
+    public class EthernetPacketTool : Log, IDisposable
     {
         const int MacAddrLen = 6;
         const int EthPacketTypeLen = 2;
@@ -25,7 +25,7 @@ namespace Knv.Ethernet
         /// </summary>
         /// <param name="srcMacAddr">eg:0040F49CA5E4</param>
         /// <param name="simulation"></param>
-        public EthPacketTester(string srcMacAddr)
+        public EthernetPacketTool(string srcMacAddr)
         {
             _srcMacAddr = srcMacAddr;
             //MAC alapján megszerzem az NIC eszközt

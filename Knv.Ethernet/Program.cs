@@ -53,7 +53,7 @@ namespace Knv.Ethernet
             var result = new byte[expData.Length];
             var maxRepeat = 7;
 
-            using (var ept = new EthPacketTester(srcMac))
+            using (var ept = new EthernetPacketTool(srcMac))
             {
                 try
                 {

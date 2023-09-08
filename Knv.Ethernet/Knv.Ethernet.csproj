@@ -98,10 +98,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EthPacketTester_UnitTest.cs" />
-    <Compile Include="Eth_Basic_UnitTest.cs" />
+    <Compile Include="UnitTest\Ethernet_UnitTest.cs" />
+    <Compile Include="UnitTest\Eth_Basic_UnitTest.cs" />
     <Compile Include="Log.cs" />
-    <Compile Include="EthPacketTester.cs" />
+    <Compile Include="EthernetPacketTool.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
