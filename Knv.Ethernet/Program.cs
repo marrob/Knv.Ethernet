@@ -8,12 +8,14 @@ namespace Knv.Ethernet
     {
         static void Main(string[] args)
         {
-            if (args.Length == 0 || args.Length != 4)
+            if (args.Length == 0 || !(args.Length == 5 || args.Length == 2))
             {
                 Console.WriteLine("Error Invlaid Argumants!");
-                Console.WriteLine("Arguments: <Source MAC> <DUT MAC> <Log Directory> <UTC Timestamp>");
-                Console.WriteLine(@"Example:00E04C3DA62F 8823FE0278B4 ""D:\Log\Valami Logj"" 1694170903");
-                
+                Console.WriteLine("Arguments With Log: <SourceMAC> <DutMAC> <LogDirectory> <LogFilePrefix> <UtcTimestamp>");
+                Console.WriteLine(@"Example:00E04C3DA62F 8823FE0278B4 ""D:\Log\"" xzy_xyz 1694170903");
+                Console.WriteLine("Arguments Without Log:<SourceMAC> <DutMAC>");
+                Console.WriteLine(@"Example:00E04C3DA62F 8823FE0278B4");
+
                 foreach (var arg in args)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -38,14 +40,28 @@ namespace Knv.Ethernet
                 goto EndWithError;
             }
 
-            string logDirectory = args[2].ToUpper().Trim();
-            long utcTimestamp = Convert.ToInt64(args[3].Trim());
+            string logDirectory = "";
+            if (args.Length > 2)
+                logDirectory = args[2].ToUpper().Trim();
 
+            string logFilePrefix = "";
+            if (args.Length > 3)
+                logFilePrefix = args[3].Trim();
+
+            long utcTimestamp = 0;
+            if (args.Length > 4)
+                utcTimestamp = Convert.ToInt64(args[4].Trim());
+            
             Console.WriteLine("Arguments:");
             Console.WriteLine($"Source MAC:{srcMac}");
             Console.WriteLine($"DUT MAC:{destMac}");
-            Console.WriteLine($"Log Directory:{logDirectory}");
-            Console.WriteLine($"UTC Timestamp:{utcTimestamp}");
+
+            if (args.Length > 2)
+                Console.WriteLine($"Log Directory:{logDirectory}");
+            if (args.Length > 3)
+                Console.WriteLine($"Log File Prefix:{logFilePrefix}");
+            if (args.Length > 4)
+                Console.WriteLine($"UTC Timestamp:{utcTimestamp}");
 
             string testResult = "Unknown";
             var reqData = new byte[] { 0xAA, 0x55, 0xAA, 0x55 };
@@ -74,7 +90,6 @@ namespace Knv.Ethernet
                             testResult = "Failed";
                             ept.LogWriteLine($"Repeat {repeat}/{maxRepeat - 1}");
                         }
-
                         System.Threading.Thread.Sleep(1000);
                     }
                 }
@@ -89,29 +104,25 @@ namespace Knv.Ethernet
                 }
                 finally
                 {
-                    ept.LogWriteLine($"Test Result: {testResult}");
-                    ept.LogSave(logDirectory, "_Ethernet", utcTimestamp);
+                    if (!string.IsNullOrEmpty(logDirectory))
+                    {
+                        ept.LogWriteLine($"Test Result: {testResult}");
+                        ept.LogSave(logDirectory, logFilePrefix, utcTimestamp);
+                    }
 
                     if (testResult == "Passed")
-                    {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine(testResult);
-                    }
                     else
-                    {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(testResult);
-                    }
+                    
+                    Console.WriteLine(testResult);
                 }
             }
             Console.ReadLine();
             return;
 
             EndWithError:
- 
-
-            Console.ReadLine();
-
+             Console.ReadLine();
         }
     }
 }
