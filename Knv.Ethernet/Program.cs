@@ -67,7 +67,7 @@ namespace Knv.Ethernet
             var reqData = new byte[] { 0xAA, 0x55, 0xAA, 0x55 };
             var expData = new byte[] { 0x55, 0xAA, 0x55, 0xAA };
             var result = new byte[expData.Length];
-            var maxRepeat = 7;
+            var maxRepeat = 10;
 
             using (var ept = new EthernetPacketTool(srcMac))
             {
@@ -104,7 +104,7 @@ namespace Knv.Ethernet
                 }
                 finally
                 {
-                    if (!string.IsNullOrEmpty(logDirectory))
+                    //if (!string.IsNullOrEmpty(logDirectory))
                     {
                         ept.LogWriteLine($"Test Result: {testResult}");
                         ept.LogSave(logDirectory, logFilePrefix, utcTimestamp);

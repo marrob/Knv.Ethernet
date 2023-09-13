@@ -8,9 +8,12 @@ namespace Knv.Eth.UnitTest
     
     using Knv.Ethernet;
     using NUnit.Framework;
+    using NUnit.Framework.Internal;
     using System;
     using System.Diagnostics;
+    using System.Linq;
     using System.Reflection;
+    using System.Xml.Linq;
 
     [TestFixture]
     internal class Ethernet_UnitTest
@@ -31,7 +34,12 @@ namespace Knv.Eth.UnitTest
         {
             using (var ept = new EthernetPacketTool(SRC_MAC_ADDR))
             {
-                ept.SendReceive(DEST_MAC_ADDR, new byte[] { 0x55, 0xAA, 0x55, 0xAA }, 3000);
+                for (int repeat = 0; repeat < 8; repeat++)
+                {
+
+                    ept.SendReceive(DEST_MAC_ADDR, new byte[] { 0x55, 0xAA, 0x55, 0xAA }, 1000);
+                    System.Threading.Thread.Sleep(1000);
+                }
                 ept.OpenLogByNpp(ept.LogSave(LOG_ROOT_DIR, MethodBase.GetCurrentMethod().Name));
             }
         }

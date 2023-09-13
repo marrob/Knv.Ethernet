@@ -52,6 +52,9 @@ namespace Knv.Ethernet
 
             _device.Open();
             LogWriteLine($"Start, Source MAC:{srcMacAddr}, Version: {Version()}, SharpPcap: {Pcap.SharpPcapVersion}");
+            _device.Filter = $"ether src or dst {_srcMacAddr}";
+
+            LogWriteLine($"Capture Filter: {_device.Filter}");
         }
         public byte[] SendReceive(string destMacAddr, byte[] reqData, int timeoutMs = 3000)
         {
@@ -84,6 +87,16 @@ namespace Knv.Ethernet
             Buffer.BlockCopy(reqData, 0, txEthPacket, 2 * MacAddrLen + EthPacketType.Length, reqData.Length);
             _device.SendPacket(txEthPacket);
             LogWriteLine($"Tx:{string.Join(" ", txEthPacket.Select(x => x.ToString("X2")))}");
+
+
+            /*
+             * Ez Capture Filter és Nem Display Filter (ha ez be van állítva akkor ez hatással van a WireShark-ra is)
+             * https://wiki.wireshark.org/CaptureFilters#useful-filters
+             * https://www.wireshark.org/docs/man-pages/pcap-filter.html
+             * 
+             *
+             */
+         
 
 
             /*
