@@ -37,6 +37,7 @@
 
             LogWriteLine("Log Saved.");
             var dt = DateTimeOffset.FromUnixTimeSeconds(utcTimestamp);
+            dt = dt.AddHours(2); //Ezzel meg van oldva a UTC->Local idő kérdése...
             var fileName = $"{prefix}_{dt:yyyy}{dt:MM}{dt:dd}_{dt:HH}{dt:mm}{dt:ss}.log";
             string path = $"{directory}\\{fileName}";
             using (var file = new System.IO.StreamWriter(path, true, Encoding.ASCII))
