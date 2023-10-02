@@ -69,6 +69,10 @@ namespace Knv.Ethernet
             var result = new byte[expData.Length];
             var maxRepeat = 10;
 
+
+
+
+
             using (var ept = new EthernetPacketTool(srcMac))
             {
                 try

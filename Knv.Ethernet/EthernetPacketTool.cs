@@ -12,7 +12,7 @@ namespace Knv.Ethernet
     {
         const int MacAddrLen = 6;
         const int EthPacketTypeLen = 2;
-        static readonly byte[] EthPacketType = new byte[] { 0x08, 0x06 };
+        static readonly byte[] EthPacketType = new byte[] { 0x08, 0x00 };
 
         ILiveDevice _device = null;
         bool _disposed = false;
