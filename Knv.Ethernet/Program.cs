@@ -64,36 +64,24 @@ namespace Knv.Ethernet
                 Console.WriteLine($"UTC Timestamp:{utcTimestamp}");
 
             string testResult = "Unknown";
-            var reqData = new byte[] { 0xAA, 0x55, 0xAA, 0x55 };
-            var expData = new byte[] { 0x55, 0xAA, 0x55, 0xAA };
-            var result = new byte[expData.Length];
+            var dataToSend = new byte[] { 0xAA, 0x55, 0xAA, 0x55 };
+            var expectedDataToReceive = new byte[] { 0x55, 0xAA, 0x55, 0xAA };
+            var result = new byte[expectedDataToReceive.Length];
             var maxRepeat = 10;
-
-
-
-
 
             using (var ept = new EthernetPacketTool(srcMac))
             {
                 try
                 {
-                    ept.LogWriteLine($"*** Src:{srcMac} Dest:{destMac}, Data:{string.Join(" ", reqData.Select(x => x.ToString("X2")))} ***");
+                    ept.LogWriteLine($"*** Src:{srcMac} Dest:{destMac}, Data:{string.Join(" ", dataToSend.Select(x => x.ToString("X2")))} ***");
                     for (int repeat = 0; repeat < maxRepeat; repeat++)
                     {
-                        var respData = ept.SendReceive(destMac, reqData, 1000);
-                        if (respData.Length >= reqData.Length)
-                            Array.Copy(respData, result, result.Length);
+                        testResult = ept.SendAndCheckResponse(destMac, dataToSend, expectedDataToReceive, 1000);
 
-                        if (Enumerable.SequenceEqual(result, expData))
-                        {
-                            testResult = "Passed";
+                        if (testResult == "Passed")
                             break;
-                        }
                         else
-                        {
-                            testResult = "Failed";
                             ept.LogWriteLine($"Repeat {repeat}/{maxRepeat - 1}");
-                        }
                         System.Threading.Thread.Sleep(1000);
                     }
                 }
@@ -108,7 +96,7 @@ namespace Knv.Ethernet
                 }
                 finally
                 {
-                    //if (!string.IsNullOrEmpty(logDirectory))
+                    if (!string.IsNullOrEmpty(logDirectory))
                     {
                         ept.LogWriteLine($"Test Result: {testResult}");
                         ept.LogSave(logDirectory, logFilePrefix, utcTimestamp);

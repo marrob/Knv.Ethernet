@@ -52,11 +52,12 @@ namespace Knv.Ethernet
 
             _device.Open();
             LogWriteLine($"Start, Source MAC:{srcMacAddr}, Version: {Version()}, SharpPcap: {Pcap.SharpPcapVersion}");
+            /*
             _device.Filter = $"ether src or dst {_srcMacAddr}";
-
             LogWriteLine($"Capture Filter: {_device.Filter}");
+            */
         }
-        public byte[] SendReceive(string destMacAddr, byte[] reqData, int timeoutMs = 3000)
+        public string SendAndCheckResponse(string destMacAddr, byte[] dataToSend, byte[] expectedDataToReceive, int timeoutMs = 3000)
         {
 
             var destMac = PhysicalAddress.Parse(destMacAddr).GetAddressBytes();
@@ -75,16 +76,16 @@ namespace Knv.Ethernet
              * {
              *     0x88, 0x23, 0xFE, 0x02, 0x78, 0xB4, // Destination MAC (DUT TTC580) 
              *     0x00, 0x40, 0xF4, 0x9C, 0xA5, 0xE4, // Source MAC (PC NIC RTL8139D)
-             *     0x08, 0x06,                         // Type: ARP
-             *     0x55, 0x55, 0x55, 0x55              // Payload
+             *     0x08, 0x00,                         // Type: ?
+             *     0x55, 0x55, 0x55, 0x55              // Payload - DataToSend
              * };
              */
 
-            var txEthPacket = new byte[2 * MacAddrLen + EthPacketTypeLen + reqData.Length];
+            var txEthPacket = new byte[2 * MacAddrLen + EthPacketTypeLen + dataToSend.Length];
             Buffer.BlockCopy(destMac, 0, txEthPacket, 0, MacAddrLen);
             Buffer.BlockCopy(srcMac, 0, txEthPacket, MacAddrLen, MacAddrLen);
             Buffer.BlockCopy(EthPacketType, 0, txEthPacket, 2 * MacAddrLen, EthPacketType.Length);
-            Buffer.BlockCopy(reqData, 0, txEthPacket, 2 * MacAddrLen + EthPacketType.Length, reqData.Length);
+            Buffer.BlockCopy(dataToSend, 0, txEthPacket, 2 * MacAddrLen + EthPacketType.Length, dataToSend.Length);
             _device.SendPacket(txEthPacket);
             LogWriteLine($"Tx:{string.Join(" ", txEthPacket.Select(x => x.ToString("X2")))}");
 
@@ -106,8 +107,8 @@ namespace Knv.Ethernet
              * {
              *   0x00, 0x40, 0xF4, 0x9C, 0xA5, 0xE4, // Destination MAC (DUT TTC580) 
              *   0x88, 0x23, 0xFE, 0x02, 0x78, 0xB4, // Source MAC (PC NIC RTL8139D)
-             *   0x08, 0x06,                         // Type: ARP
-             *   0xAA, 0xAA, 0xAA, 0xAA              // Payload
+             *   0x08, 0x00,                         // Type: ?
+             *   0xAA, 0xAA, 0xAA, 0xAA              // Payload - Expected DataToRecieve
              * };
              */
             long startTick = DateTime.Now.Ticks;
@@ -124,23 +125,30 @@ namespace Knv.Ethernet
                     LogWriteLine($"Rx:{string.Join(" ", respPayload.Select(x => x.ToString("X2")))}");
 
                     if (new PhysicalAddress(respSrcMac).Equals(PhysicalAddress.Parse(destMacAddr)))
-                    {//A ha válsz EthPacketben a forrás a cimzett volt, akkor ez a válasz üzenet a krésre
+                    {//A ha válsz EthPacketben a forrás a cimzett volt, akkor ez a válasz a küldött üzentre
 
-                        if (respPayload.Length >= (2 * MacAddrLen + reqData.Length))
+                        if (respPayload.Length >= (2 * MacAddrLen))
                         {
                             var headerLen = 2 * MacAddrLen + EthPacketType.Length;
                             var respData = new byte[respPayload.Length - headerLen];
                             Buffer.BlockCopy(respPayload, headerLen, respData, 0, respData.Length);
                             LogWriteLine("Response: " + string.Join(" ", respData.Select(x => x.ToString("X2"))));
-                            return respData;
+
+                            //Ha a válsz hosszabb mint a várt adat, levágjuk a fölleges részt.
+                            byte[] reSizedRespData = new byte[expectedDataToReceive.Length];
+                            if (respData.Length >= expectedDataToReceive.Length)
+                                Buffer.BlockCopy(respData, 0, reSizedRespData, 0, expectedDataToReceive.Length);
+
+                            if (Enumerable.SequenceEqual(reSizedRespData, expectedDataToReceive))
+                                return "Passed";
                         }
                     }
                 }
 
                 if (DateTime.Now.Ticks - startTick > timeoutMs * 10000)
                 {
-                    LogWriteLine($"No response from destination in {timeoutMs}ms. Destination MAC:{destMacAddr}");
-                    return new byte[0];
+                    LogWriteLine($"No excepted data received from destination in {timeoutMs}ms. Destination MAC:{destMacAddr}");
+                    return "Failed";
                 }
 
             } while (true);
