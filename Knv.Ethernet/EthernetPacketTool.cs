@@ -8,7 +8,7 @@ namespace Knv.Ethernet
     using System.Net.NetworkInformation;
     using System.Reflection;
 
-    public class EthernetPacketTool : Log, IDisposable
+    public class EthernetPacketTool: IDisposable
     {
         const int MacAddrLen = 6;
         const int EthPacketTypeLen = 2;
@@ -46,12 +46,12 @@ namespace Knv.Ethernet
                 var msg = $"Error: Your PC does not contain Network Interface (NIC) with {srcMacAddr} MAC adderess. Please check it.\r\n";
                 msg += $"Source MAC: {srcMacAddr}, Version: {Version()}, SharpPcap: {Pcap.SharpPcapVersion}\r\n";
                 msg += ex.Message;
-                LogWriteLine(msg);
+                Log.LogWriteLine(msg);
                 throw new Exception(msg);
             }
 
             _device.Open();
-            LogWriteLine($"Start, Source MAC:{srcMacAddr}, Version: {Version()}, SharpPcap: {Pcap.SharpPcapVersion}");
+            Log.LogWriteLine($"Start, Source MAC:{srcMacAddr}, Version: {Version()}, SharpPcap: {Pcap.SharpPcapVersion}");
             /*
             _device.Filter = $"ether src or dst {_srcMacAddr}";
             LogWriteLine($"Capture Filter: {_device.Filter}");
@@ -87,7 +87,7 @@ namespace Knv.Ethernet
             Buffer.BlockCopy(EthPacketType, 0, txEthPacket, 2 * MacAddrLen, EthPacketType.Length);
             Buffer.BlockCopy(dataToSend, 0, txEthPacket, 2 * MacAddrLen + EthPacketType.Length, dataToSend.Length);
             _device.SendPacket(txEthPacket);
-            LogWriteLine($"Tx:{string.Join(" ", txEthPacket.Select(x => x.ToString("X2")))}");
+            Log.LogWriteLine($"Tx:{string.Join(" ", txEthPacket.Select(x => x.ToString("X2")))}");
 
 
             /*
@@ -122,7 +122,7 @@ namespace Knv.Ethernet
                     respPayload = rxPacket.Data.ToArray();
                     Buffer.BlockCopy(respPayload, 0, respDestMac, 0, MacAddrLen);
                     Buffer.BlockCopy(respPayload, MacAddrLen, respSrcMac, 0, MacAddrLen);
-                    LogWriteLine($"Rx:{string.Join(" ", respPayload.Select(x => x.ToString("X2")))}");
+                    Log.LogWriteLine($"Rx:{string.Join(" ", respPayload.Select(x => x.ToString("X2")))}");
 
                     if (new PhysicalAddress(respSrcMac).Equals(PhysicalAddress.Parse(destMacAddr)))
                     {//A ha válsz EthPacketben a forrás a cimzett volt, akkor ez a válasz a küldött üzentre
@@ -132,7 +132,7 @@ namespace Knv.Ethernet
                             var headerLen = 2 * MacAddrLen + EthPacketType.Length;
                             var respData = new byte[respPayload.Length - headerLen];
                             Buffer.BlockCopy(respPayload, headerLen, respData, 0, respData.Length);
-                            LogWriteLine("Response: " + string.Join(" ", respData.Select(x => x.ToString("X2"))));
+                            Log.LogWriteLine("Response: " + string.Join(" ", respData.Select(x => x.ToString("X2"))));
 
                             //Ha a válsz hosszabb mint a várt adat, levágjuk a fölleges részt.
                             byte[] reSizedRespData = new byte[expectedDataToReceive.Length];
@@ -147,7 +147,7 @@ namespace Knv.Ethernet
 
                 if (DateTime.Now.Ticks - startTick > timeoutMs * 10000)
                 {
-                    LogWriteLine($"No excepted data received from destination in {timeoutMs}ms. Destination MAC:{destMacAddr}");
+                    Log.LogWriteLine($"No excepted data received from destination in {timeoutMs}ms. Destination MAC:{destMacAddr}");
                     return "Failed";
                 }
 

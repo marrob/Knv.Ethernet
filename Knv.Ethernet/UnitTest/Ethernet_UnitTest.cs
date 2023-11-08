@@ -40,7 +40,7 @@ namespace Knv.Eth.UnitTest
                     ept.SendAndCheckResponse(DEST_MAC_ADDR, new byte[] { 0x55, 0xAA, 0x55, 0xAA }, new byte[] { 0xAA, 0x55, 0xAA, 0x55 }, 1000);
                     System.Threading.Thread.Sleep(1000);
                 }
-                ept.OpenLogByNpp(ept.LogSave(LOG_ROOT_DIR, MethodBase.GetCurrentMethod().Name));
+                Log.OpenLogByNpp(Log.LogSave(LOG_ROOT_DIR, MethodBase.GetCurrentMethod().Name));
             }
         }
 

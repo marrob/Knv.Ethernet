@@ -1,0 +1,28 @@
+D8EB97B94F9A 8823FE03A2E0 C:\Users\Public\Documents\AltonTech\TTC\TTC500_Logs\TTC580-CP-AS_A3C1141720001\ A3C1141720001_TT22200200079_Ethernet 1699455484
+
+
+Ezzel lehet debugolni 
+Knv.Ethernet.exe D8EB97B94F9A 8823FE03A2E0 D:\EthLog\ A3C1141720001_TT22200200079_Ethernet 1699455484
+
+VS-ben így:
+D8EB97B94F9A 8823FE03A2E0 D:\EthLog\ A3C1141720001_TT22200200079_Ethernet 1699455484
+
+00802F36BA66 8823FE04E98A ""c:\Users\Public\Documents"" xzy_xyz 1694170903
+
+
+
+
+Ha ezt látod, akkor Pcap kell amit a wireshark telepít. Amit  Wireshark-win64-3.6.8.exe telepít az tuti jó.
+
+2023.11.08 16:16:32:211 Error: System.DllNotFoundException: Unable to load DLL 'wpcap': The specified module could not be found. (Exception from HRESULT: 0x8007007E)
+   at SharpPcap.LibPcap.LibPcapSafeNativeMethods.pcap_findalldevs(IntPtr& alldevs, StringBuilder errbuf)
+   at SharpPcap.LibPcap.PcapInterface.GetAllPcapInterfaces()
+   at SharpPcap.LibPcap.LibPcapLiveDeviceList.GetDevices()
+   at SharpPcap.LibPcap.LibPcapLiveDeviceList.Refresh()
+   at SharpPcap.LibPcap.LibPcapLiveDeviceList.get_Instance()
+   at SharpPcap.CaptureDeviceList..ctor()
+   at SharpPcap.CaptureDeviceList.get_Instance()
+   at Knv.Ethernet.EthernetPacketTool..ctor(String srcMacAddr) in C:\Users\Public\Documents\AltonTech\TTC\Support\Knv.Ethernet\Knv.Ethernet\EthernetPacketTool.cs:line 32
+   at Knv.Ethernet.Program.Main(String[] args) in C:\Users\Public\Documents\AltonTech\TTC\Support\Knv.Ethernet\Knv.Ethernet\Program.cs:line 74
+2023.11.08 16:16:32:220 Test Result: Unknown
+2023.11.08 16:16:32:222 Log Saved.

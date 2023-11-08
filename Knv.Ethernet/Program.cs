@@ -22,22 +22,22 @@ namespace Knv.Ethernet
                     Console.WriteLine(arg);
                     Console.ForegroundColor = ConsoleColor.Gray;
                 }
-                
-                goto EndWithError;
+
+                Console.ReadLine();
             }
 
             string srcMac = args[0].ToUpper().Trim();
             if (srcMac.Length != 12)
             {
                 Console.WriteLine($"Error: Source MAC {srcMac} format invalid.");
-                goto EndWithError;
+                Console.ReadLine();
             }
 
             string destMac = args[1].ToUpper().Trim();
             if (destMac.Length != 12)
             {
                 Console.WriteLine($"Error: Source MAC {srcMac} format invalid.");
-                goto EndWithError;
+                Console.ReadLine();
             }
 
             string logDirectory = "";
@@ -69,52 +69,64 @@ namespace Knv.Ethernet
             var result = new byte[expectedDataToReceive.Length];
             var maxRepeat = 10;
 
-            using (var ept = new EthernetPacketTool(srcMac))
+            try
             {
-                try
+                using (var ept = new EthernetPacketTool(srcMac))
                 {
-                    ept.LogWriteLine($"*** Src:{srcMac} Dest:{destMac}, Data:{string.Join(" ", dataToSend.Select(x => x.ToString("X2")))} ***");
-                    for (int repeat = 0; repeat < maxRepeat; repeat++)
+                    try
                     {
-                        testResult = ept.SendAndCheckResponse(destMac, dataToSend, expectedDataToReceive, 1000);
+                        Log.LogWriteLine($"*** Src:{srcMac} Dest:{destMac}, Data:{string.Join(" ", dataToSend.Select(x => x.ToString("X2")))} ***");
+                        for (int repeat = 0; repeat < maxRepeat; repeat++)
+                        {
+                            testResult = ept.SendAndCheckResponse(destMac, dataToSend, expectedDataToReceive, 1000);
+
+                            if (testResult == "Passed")
+                                break;
+                            else
+                                Log.LogWriteLine($"Repeat {repeat}/{maxRepeat - 1}");
+                            System.Threading.Thread.Sleep(1000);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        var msg = $"Error: {ex}";
+                        Log.LogWriteLine(msg);
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(msg);
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        Console.ReadLine();
+                    }
+                    finally
+                    {
+                        if (!string.IsNullOrEmpty(logDirectory))
+                        {
+                            Log.LogWriteLine($"Test Result: {testResult}");
+                            Log.LogSave(logDirectory, logFilePrefix, utcTimestamp);
+                        }
 
                         if (testResult == "Passed")
-                            break;
+                            Console.ForegroundColor = ConsoleColor.Green;
                         else
-                            ept.LogWriteLine($"Repeat {repeat}/{maxRepeat - 1}");
-                        System.Threading.Thread.Sleep(1000);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    var msg = $"Error: {ex}";
-                    ept.LogWriteLine(msg);
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(msg);
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    goto EndWithError;
-                }
-                finally
-                {
-                    if (!string.IsNullOrEmpty(logDirectory))
-                    {
-                        ept.LogWriteLine($"Test Result: {testResult}");
-                        ept.LogSave(logDirectory, logFilePrefix, utcTimestamp);
-                    }
+                            Console.ForegroundColor = ConsoleColor.Red;
 
-                    if (testResult == "Passed")
-                        Console.ForegroundColor = ConsoleColor.Green;
-                    else
-                        Console.ForegroundColor = ConsoleColor.Red;
-                    
-                    Console.WriteLine(testResult);
+                        Console.WriteLine(testResult);
+                    }
                 }
             }
-            Console.ReadLine();
-            return;
-
-            EndWithError:
-             Console.ReadLine();
+            catch (Exception ex)
+            {
+                var msg = $"Error: {ex}";
+                Log.LogWriteLine(msg);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(msg);
+                Console.ForegroundColor = ConsoleColor.Gray;
+                if (!string.IsNullOrEmpty(logDirectory))
+                {
+                    Log.LogWriteLine($"Test Result: {testResult}");
+                    Log.LogSave(logDirectory, logFilePrefix, utcTimestamp);
+                }
+                Console.ReadLine();
+            }
         }
     }
 }
